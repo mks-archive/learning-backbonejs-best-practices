@@ -1,4 +1,4 @@
-#Stack Editor (Vertical Page Layer Editor) 
+#Vertical Page Layer (Stack) Editor
 
 This repo holds a proof-of-concept I am building as I learn Backbone.js. for a visual page editor that allows definition of vertically-layered full-width content containers _(Page Layers)_
 
