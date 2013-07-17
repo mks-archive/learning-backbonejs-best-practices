@@ -2,6 +2,7 @@
 /**
  * @version stack-editor-v0.1
  */
+ob_start();
 ?>
 <!--
  * The purpose of Stack Editor is is to represent a to-be-generated web page that will have a header and a series of
@@ -52,3 +53,7 @@
   <script src="js/scripts.js"></script>
 </body>
 </html>
+<?php
+$html = ob_get_clean();
+file_put_contents( __DIR__ . '/index.html', $html );
+echo $html;
