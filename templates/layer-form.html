@@ -1,0 +1,59 @@
+<label for="layer-title">Layer Title:</label>
+<input type="text" id="layer-title" name="layer_title" value="<%= layer.title %>" />
+
+  <div id="layer-brand-wrapper" class="html-select">
+    <label for="layer-brand">For this Brand:</label>
+    <select id="layer-brand" name="layer_brand">
+      <option value="bmw">BMW</option>
+      <option value="lamborghini">Lamborghini</option>
+      <option value="mercedes">Mercedes</option>
+      <option value="audi">Audi</option>
+      <option value="ferrari">Ferrari</option>
+      <option value="porsche">Porsche</option>
+      <option value="volkswagen">Volkswagen</option>
+      <option value="honda">Honda</option>
+      <option value="aston-martin">Aston Martin</option>
+      <option value="bugatti">Bugatti</option>
+    </select>
+  </div>
+  <div id="layer-region-wrapper" class="html-select">
+    <label for="layer-region">For this Region:</label>
+    <select id="layer-region" name="layer_region">
+      <option value="north-america">North America</option>
+      <option value="south-america">South America</option>
+      <option value="europe">Europe</option>
+      <option value="asia">Asia</option>
+      <option value="africa">Africa</option>
+      <option value="down-under">Down Under</option>
+    </select>
+  </div>
+
+  <div id="layer-orderby-wrapper" class="html-select">
+    <label for="layer-orderby">Order By:</label>
+    <select id="layer-orderby" name="layer_orderby">
+      <option value="most-recent">Most Recent First</option>
+      <option value="manutally-ordered">Manually Ordered</option>
+    </select>
+  </div>
+  <div id="layer-date-range-wrapper" class="html-select">
+    <label for="layer-date-range">Date Range:</label>
+    <select id="layer-date-range" name="layer_date_range">
+      <option value="most-recent">Most Recent First</option>
+      <option value="manutally-ordered">Manually Ordered</option>
+    </select>
+  </div>
+
+<label for="layer-include-terms">WITH these Folksonomy Tags:</label>
+<input type="text" id="layer-include-terms" name="layer_include_terms" value="<%= layer.includeTerms.join(' ') %>" />
+
+<label for="layer-exclude-terms">WITH these Folksonomy Tags:</label>
+<input type="text" id="layer-exclude-terms" name="layer_exclude_terms" value="<%= layer.excludeTerms.join(' ') %>" />
+
+<label for="layer-include-posts">Also INCLUDE these:</label>
+<input type="text" id="layer-include-posts" name="layer_include_posts" value="<%= layer.includePosts.join(' ') %>" />
+
+<label for="layer-exclude-posts">Also EXCLUDE these:</label>
+<input type="text" id="layer-exclude-posts" name="layer_exclude_posts" value="<%= layer.excludePosts.join(' ') %>" />
+
+
+

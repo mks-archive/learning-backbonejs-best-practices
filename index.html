@@ -1,0 +1,51 @@
+
+<!--
+ * The purpose of Stack Editor is is to represent a to-be-generated web page that will have a header and a series of
+ * horizontally flowing content containers. The collection of content containers is termed a "Stack" and each
+ * container is termed a "Layer." Besides adding and arranging layers the Stack Editor allows query criteria to be
+ * established for each Layer where the criteria determines the content that will populate the layer.
+ *-->
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Stack Editor</title>
+  <link href="css/styles.css" rel="stylesheet" />
+  <link href="http://code.jquery.com/ui/1.10.3/themes/smoothness/jquery-ui.css" rel="stylesheet" />
+</head>
+<body>
+  <div id="stack-editor">
+    <div id="layer-addition-container" class="box">
+      <p>Step 1. Add a Layer to the Stack:</p>
+      <form id="layer-addition-form">
+        <div class="input-wrapper">
+          <label for="content-type-select">A. Select Content Type:</label> <select id="content-type-select">To Be Replaced</select>
+        </div>
+        <div class="input-wrapper">
+          <label for="layout-type-select">B. Select Layout:</label> <select id="layout-type-select"><option>To Be Replaced</option></select>
+        </div>
+        <div class="input-wrapper">
+          <label for="layout-type-select">C. Add to Stack:</label> <button id="add-layer-button">Add Layer</button>
+        </div>
+      </form>
+      <div class="clear"></div>
+    </div>
+    <div id="stack-wrapper" class="box side-by-side">
+      <p>Step 2. Reorder and/or Select Layer to Configure:</p>
+      <div id="stack-container"></div>
+    </div>
+    <div id="layer-form-wrapper" class="box side-by-side">
+      <p>Step 3. Configure Layer:</p>
+      <div id="layer-form-container"></div>
+      <div class="clear"></div>
+    </div>
+  </div>
+  <pre id="backbone-templates" style="display:none">
+{&quot;layer-form&quot;:&quot;&lt;label for=\&quot;layer-title\&quot;&gt;Layer Title:&lt;\/label&gt;\n&lt;input type=\&quot;text\&quot; id=\&quot;layer-title\&quot; name=\&quot;layer_title\&quot; value=\&quot;&lt;%= layer.title %&gt;\&quot; \/&gt;\n\n  &lt;div id=\&quot;layer-brand-wrapper\&quot; class=\&quot;html-select\&quot;&gt;\n    &lt;label for=\&quot;layer-brand\&quot;&gt;For this Brand:&lt;\/label&gt;\n    &lt;select id=\&quot;layer-brand\&quot; name=\&quot;layer_brand\&quot;&gt;\n      &lt;option value=\&quot;bmw\&quot;&gt;BMW&lt;\/option&gt;\n      &lt;option value=\&quot;lamborghini\&quot;&gt;Lamborghini&lt;\/option&gt;\n      &lt;option value=\&quot;mercedes\&quot;&gt;Mercedes&lt;\/option&gt;\n      &lt;option value=\&quot;audi\&quot;&gt;Audi&lt;\/option&gt;\n      &lt;option value=\&quot;ferrari\&quot;&gt;Ferrari&lt;\/option&gt;\n      &lt;option value=\&quot;porsche\&quot;&gt;Porsche&lt;\/option&gt;\n      &lt;option value=\&quot;volkswagen\&quot;&gt;Volkswagen&lt;\/option&gt;\n      &lt;option value=\&quot;honda\&quot;&gt;Honda&lt;\/option&gt;\n      &lt;option value=\&quot;aston-martin\&quot;&gt;Aston Martin&lt;\/option&gt;\n      &lt;option value=\&quot;bugatti\&quot;&gt;Bugatti&lt;\/option&gt;\n    &lt;\/select&gt;\n  &lt;\/div&gt;\n  &lt;div id=\&quot;layer-region-wrapper\&quot; class=\&quot;html-select\&quot;&gt;\n    &lt;label for=\&quot;layer-region\&quot;&gt;For this Region:&lt;\/label&gt;\n    &lt;select id=\&quot;layer-region\&quot; name=\&quot;layer_region\&quot;&gt;\n      &lt;option value=\&quot;north-america\&quot;&gt;North America&lt;\/option&gt;\n      &lt;option value=\&quot;south-america\&quot;&gt;South America&lt;\/option&gt;\n      &lt;option value=\&quot;europe\&quot;&gt;Europe&lt;\/option&gt;\n      &lt;option value=\&quot;asia\&quot;&gt;Asia&lt;\/option&gt;\n      &lt;option value=\&quot;africa\&quot;&gt;Africa&lt;\/option&gt;\n      &lt;option value=\&quot;down-under\&quot;&gt;Down Under&lt;\/option&gt;\n    &lt;\/select&gt;\n  &lt;\/div&gt;\n\n  &lt;div id=\&quot;layer-orderby-wrapper\&quot; class=\&quot;html-select\&quot;&gt;\n    &lt;label for=\&quot;layer-orderby\&quot;&gt;Order By:&lt;\/label&gt;\n    &lt;select id=\&quot;layer-orderby\&quot; name=\&quot;layer_orderby\&quot;&gt;\n      &lt;option value=\&quot;most-recent\&quot;&gt;Most Recent First&lt;\/option&gt;\n      &lt;option value=\&quot;manutally-ordered\&quot;&gt;Manually Ordered&lt;\/option&gt;\n    &lt;\/select&gt;\n  &lt;\/div&gt;\n  &lt;div id=\&quot;layer-date-range-wrapper\&quot; class=\&quot;html-select\&quot;&gt;\n    &lt;label for=\&quot;layer-date-range\&quot;&gt;Date Range:&lt;\/label&gt;\n    &lt;select id=\&quot;layer-date-range\&quot; name=\&quot;layer_date_range\&quot;&gt;\n      &lt;option value=\&quot;most-recent\&quot;&gt;Most Recent First&lt;\/option&gt;\n      &lt;option value=\&quot;manutally-ordered\&quot;&gt;Manually Ordered&lt;\/option&gt;\n    &lt;\/select&gt;\n  &lt;\/div&gt;\n\n&lt;label for=\&quot;layer-include-terms\&quot;&gt;WITH these Folksonomy Tags:&lt;\/label&gt;\n&lt;input type=\&quot;text\&quot; id=\&quot;layer-include-terms\&quot; name=\&quot;layer_include_terms\&quot; value=\&quot;&lt;%= layer.includeTerms.join(' ') %&gt;\&quot; \/&gt;\n\n&lt;label for=\&quot;layer-exclude-terms\&quot;&gt;WITH these Folksonomy Tags:&lt;\/label&gt;\n&lt;input type=\&quot;text\&quot; id=\&quot;layer-exclude-terms\&quot; name=\&quot;layer_exclude_terms\&quot; value=\&quot;&lt;%= layer.excludeTerms.join(' ') %&gt;\&quot; \/&gt;\n\n&lt;label for=\&quot;layer-include-posts\&quot;&gt;Also INCLUDE these:&lt;\/label&gt;\n&lt;input type=\&quot;text\&quot; id=\&quot;layer-include-posts\&quot; name=\&quot;layer_include_posts\&quot; value=\&quot;&lt;%= layer.includePosts.join(' ') %&gt;\&quot; \/&gt;\n\n&lt;label for=\&quot;layer-exclude-posts\&quot;&gt;Also EXCLUDE these:&lt;\/label&gt;\n&lt;input type=\&quot;text\&quot; id=\&quot;layer-exclude-posts\&quot; name=\&quot;layer_exclude_posts\&quot; value=\&quot;&lt;%= layer.excludePosts.join(' ') %&gt;\&quot; \/&gt;&quot;,&quot;layout-type-select&quot;:&quot;&lt;select id=\&quot;layout-type-select\&quot;&gt;\n  &lt;% options.each(function(option) { %&gt;\n    &lt;option value=\&quot;&lt;%= option.id %&gt;\&quot;&gt;&lt;%= option.get(\&quot;title\&quot;) %&gt;&lt;\/option&gt;\n  &lt;% }); %&gt;\n&lt;\/select&gt;&quot;,&quot;content-type-select&quot;:&quot;&lt;select id=\&quot;content-type-select\&quot;&gt;\n  &lt;% options.each(function(option) { %&gt;\n    &lt;option value=\&quot;&lt;%= option.id %&gt;\&quot;&gt;&lt;%= option.get(\&quot;title\&quot;) %&gt;&lt;\/option&gt;\n  &lt;% }); %&gt;\n&lt;\/select&gt;&quot;,&quot;layer&quot;:&quot;&lt;%= layer.title %&gt;&quot;}
+</pre>  <script src="http://cdnjs.cloudflare.com/ajax/libs/jquery/1.8.3/jquery.js"></script>
+  <script src="http://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.10.3/jquery-ui.js"></script>
+  <script src="http://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.4.4/underscore.js"></script>
+  <script src="http://cdnjs.cloudflare.com/ajax/libs/backbone.js/1.0.0/backbone.js"></script>
+  <script src="js/scripts.js"></script>
+</body>
+</html>

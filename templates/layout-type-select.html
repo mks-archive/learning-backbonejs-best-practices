@@ -1,0 +1,5 @@
+<select id="layout-type-select">
+  <% options.each(function(option) { %>
+    <option value="<%= option.id %>"><%= option.get("title") %></option>
+  <% }); %>
+</select>

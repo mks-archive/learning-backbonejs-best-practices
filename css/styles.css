@@ -1,0 +1,72 @@
+.clear {
+	clear:both;
+}
+#stack-editor {
+	margin:2em auto;
+	width: 800px;
+}
+#stack-editor .box {
+	border:1px solid grey;
+	margin-bottom: -1px;
+	padding: 10px 20px;
+}
+#stack-editor .side-by-side {
+	height:400px;
+	overflow-y:scroll;
+}
+#layer-addition-container {
+	width: 758px;
+}
+#layer-addition-container p {
+	margin: 18px 0 0 0;
+}
+#layer-addition-container .input-wrapper {
+	float:left;
+	margin:1em;
+}
+#layer-addition-container .input-wrapper label {
+	display:block;
+}
+#stack-wrapper {
+	width: 359px;
+	float:left;
+	margin-right: -1px;
+}
+#stack-wrapper .layer {
+	width:75%;
+	border:1px solid grey;
+	padding:1em 2em;
+	margin:1em auto;
+	text-align:center;
+}
+#stack-wrapper .layer.selected:hover,
+#stack-wrapper .layer.selected {
+	background-color: orange;
+}
+#stack-wrapper .layer {
+}
+#stack-wrapper .layer:hover {
+	background-color: lightgrey;
+	cursor:pointer;
+}
+#layer-form-wrapper {
+	width: 358px;
+	float:right;
+	margin-left: -1px;
+	border-right: none;
+}
+#layer-form {
+}
+#layer-form label {
+	display:block;
+	font-weight: bold;
+}
+#layer-form input {
+	width:95%;
+}
+#layer-form .html-select {
+	float:left;
+	margin:1em;
+	width:40%;
+}
+

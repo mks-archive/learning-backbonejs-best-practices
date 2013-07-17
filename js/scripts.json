@@ -1,0 +1,11 @@
+[
+	"app.js",
+	"utils/templates.js",
+	"utils/string.js",
+	"brands.js",
+	"geo-regions.js",
+	"content-types.js",
+	"layout-types.js",
+	"layers.js",
+	"stack.js"
+]
