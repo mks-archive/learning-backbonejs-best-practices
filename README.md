@@ -27,7 +27,7 @@ If your colleagues think of you as a Backbone.js guru then please, we'd love to 
 
 1. **Comment** on [any of the issues](https://github.com/mikeschinkel/learning-backbonejs-best-practices/issues) posted in this repo.
 
-2. Read the code and **make suggestions** by [posting a new issue](https://github.com/mikeschinkel/learning-backbonejs-best-practices/issues/new).
+2. [Read the code](https://github.com/mikeschinkel/learning-backbonejs-best-practices/) and **make suggestions** by [posting a new issue](https://github.com/mikeschinkel/learning-backbonejs-best-practices/issues/new).
 
 2. Fork the code, make changes, **submit a pull request** then optionally explain the changes by [posting a new issue](https://github.com/mikeschinkel/learning-backbonejs-best-practices/issues/new).
 
