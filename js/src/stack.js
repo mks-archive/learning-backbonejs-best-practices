@@ -5,22 +5,30 @@
  */
 app.Stack = Backbone.Collection.extend({
 	modelType: "Stack",
-	model: app.Layer
+	model: app.Layer,
+	initialize: function(){
+		this.on('add',function(){ app.trigger('layer:changed') });
+	},
+	comparator: function(layer) {
+		return layer.get('order');
+	}
 });
 app.StackView = Backbone.View.extend({
-	events:{
-		'click .layer':'onLayerClick'
-	},
+	el:"#stack-container",
 	initialize: function(options) {
 		this.options.viewType = "StackView";
+		this.options.selected = null;
 		if (!("collection" in this)) {
 			this.collection = new app.Stack();
 		}
-		this.listenTo(this.collection,'add',this.onAdd,this);
+		this.listenTo(this.collection,'add',this.onAddLayer,this);
 		this._layerViews = [];
 	},
-	onAdd: function(layer){
-		var layerView = this._layerViews[layer.cid] = new app.LayerView({model:layer});
+	onAddLayer: function(layer){
+		var layerView = this._layerViews[layer.cid] = new app.LayerView({
+			model:layer,
+			container:this
+		});
 		this.select(layerView).render();
 	},
 	getLayerView: function(layer){
@@ -28,26 +36,43 @@ app.StackView = Backbone.View.extend({
 		return cid in this._layerViews ? this._layerViews[cid] : null;
 	},
 	render: function() {
-		var layerView,that = this;
-		this.$el.empty();	// @todo Render only what is needed
+		var layerView,outerThis = this;
+		//this.$el.empty();	// @todo Render only what is needed
 		this.$el.attr('data-cid',this.cid);
 		this.collection.each(function(layer){
-			layerView = that._layerViews[layer.cid];
-			that.$el.append(layerView.render().el);
+			layerView = outerThis._layerViews[layer.cid];
+			outerThis.$el.append(layerView.render().el);
 		});
-		that.$el.append("<div class=\"clear\"></div>");
+		this.$el.append("<div class=\"clear\"></div>");
 		return this;
-	},
-	onLayerClick:function(event){
-		app.stackView.select(this.getLayerView(event.target.dataset.cid)).render();
 	},
 	select:function(layerView){
-		var that = this;
-		this.collection.each(function(layer){
-			that.getLayerView(layer.cid).options.selected = false;
+		if (this.options.selected)
+			this.options.selected.deselect();
+		var form = new app.LayerForm({
+			model:layerView.model
 		});
-		layerView.options.selected = true;
-		layerView.options.form.render();
+		app.$layerFormContainer.empty().append(form.render().el);
+		form.highlight();
+		layerView.options.form = form;
+		this.options.selected = layerView;
 		return this;
+	},
+	sortable:function(options){
+		var outerThis = this;
+		this.$el.sortable(_.extend({},options,{
+			items:"div.layer",
+			cursor:"move",
+			opacity:0.6,
+			update:function(event,ui){
+				var i= 1;
+				_(outerThis.$el.sortable("toArray",{attribute:"data-cid"})).each(function(cid){
+					outerThis._layerViews[cid].model.set('order',i++);
+				});
+				outerThis.collection.sort();
+				outerThis.render();
+			}
+		}));
 	}
 });
+

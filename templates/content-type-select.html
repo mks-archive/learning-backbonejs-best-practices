@@ -1,5 +1,6 @@
 <select id="content-type-select">
+  <option value="unselected">Select One</option>
   <% options.each(function(option) { %>
-    <option value="<%= option.id %>"><%= option.get("title") %></option>
+    <option value="<%= option.get('value') %>"><%= option.get('text') %></option>
   <% }); %>
 </select>

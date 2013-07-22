@@ -1,6 +1,16 @@
-.clear {
+/*** http://css-tricks.com/pseudo-element-roundup/ ***/
+.clearfix:before,
+.clearfix:after {
+	content:"";
+	display:table;
+}
+.clearfix:after {
 	clear:both;
 }
+.clearfix {
+	zoom:1; /** IE 6/7 **/
+}
+/*** ***/
 #stack-editor {
 	margin:2em auto;
 	width: 800px;

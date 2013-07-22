@@ -6,17 +6,21 @@
 app.ContentType = Backbone.Model.extend({
 	defaults:{
 		modelType: "ContentType",
-		title: "Untitled"
+		text: "Untitled",
+		value: false
 	},
 	initialize: function(){
-		this.id = "content-type-"+app.dashify(this.attributes.title.replace('+','plus'));
+		this.id = app.dashify(this.get('text').replace('+','plus')).replace(/^-+\s*(.*)$/,'$1');
+		if ( ! this.get('value') )
+			this.set('value',this.id);
 	}
 });
-app.ContentTypeOptionList = Backbone.Collection.extend({
-	collectionType: "ContentTypeOptionList",
+app.ContentTypes = Backbone.Collection.extend({
+	collectionType: "ContentTypes",
 	model: app.ContentType
 });
 app.ContentTypeSelect = Backbone.View.extend({
+	el:"#content-type-select",
 	tagName: 'select',
 	initialize: function(options){
 		this.options.viewType = "ContentTypeSelect";

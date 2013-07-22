@@ -1,65 +1,77 @@
 /**
  * prefix.combinejs - Opening wrapper for use with CombineJS to wrap all Javascript code into a single /js/scripts.js
  */
-jQuery(function($) {
+(function($) {
 /**
  * app.js - Application object to act as unofficial controller.
  */
 
-if (typeof app == "undefined") app={};
+if (typeof app == "undefined") var app={};
+_.extend(app, Backbone.Events);
+
 app.assignElement = function(id) {
 	var cameledId = app.camelify(id);
 	app[cameledId+"Id"] = id;
 	return $("#"+app[cameledId+"Id"]);
 };
+
 app.addLayer = function(){
 	var layer = new app.Layer({
-		contentType: $("#content-type-select").val(),
-		layoutType: $("#layout-type-select").val(),
-		container:this.stack
-	});
-	var layerView = new app.LayerView({model:layer,selected:true});
-	this.stack.add(layerView);
+			contentType: $("#content-type-select").val(),
+			layoutType: $("#layout-type-select").val(),
+			container:this.stack
+		});
+	this.stack.add(layer);
 	return this;
 };
+app.onLayerChanged = function(layer){
+	var layers = _.map(app.stack.models,function(layer){
+		var cloned = _.extend({},layer).attributes;
+		delete cloned.container;
+		return cloned;
+	});
+	$('#stack-json').val(JSON.stringify(layers));
+};
 app.execute = function(){
-	app.$layoutTypeSelect = app.assignElement("layout-type-select");
-	app.$contentTypeSelect = app.assignElement("content-type-select");
-	app.$stackContainer = app.assignElement("stack-container");
 	app.$layerAdditionContainer = app.assignElement("layer-addition-container");
 	app.$addLayerButton = app.assignElement("add-layer-button");
 	app.$layerFormContainer = app.assignElement("layer-form-container");
+	app.$layerIncludeTerms = app.assignElement("layer-include-terms");
 
-	app.contentTypes = new app.ContentTypeOptionList([
-		new app.ContentType({title:'Document'}),
-		new app.ContentType({title:'Spreadsheet'}),
-		new app.ContentType({title:'Presentation'}),
-		new app.ContentType({title:'Audio'}),
-		new app.ContentType({title:'Video'}),
-		new app.ContentType({title:'Image'}),
-		new app.ContentType({title:'Stack'}),
-		new app.ContentType({title:'Other'}),
+	app.contentTypes = new app.ContentTypes([
+		new app.ContentType({text:'Contact (e.g. People)', value:'contact'}),
+		new app.ContentType({text:'Event'}),
+		new app.ContentType({text:'Downloadable'}),
+		new app.ContentType({text:'- Works'}),
+		new app.ContentType({text:'-- Document'}),
+		new app.ContentType({text:'-- Spreadsheet'}),
+		new app.ContentType({text:'-- Presentation'}),
+		new app.ContentType({text:'- Media'}),
+		new app.ContentType({text:'-- Audio'}),
+		new app.ContentType({text:'-- Video'}),
+		new app.ContentType({text:'-- Image'}),
+		new app.ContentType({text:'- Other'}),
+		new app.ContentType({text:'Stack'}),
+		new app.ContentType({text:'Mixed'}),
 	]);
 
 	app.contentTypeSelect = new app.ContentTypeSelect({
-		collection: app.contentTypes,
-		el: app.$contentTypeSelect[0]
+		collection: app.contentTypes
 	});
 
 	app.contentTypeSelect.render();
 
 	app.layoutTypes = new app.LayoutTypes([
-		new app.LayoutType({title:'Vertical List'}),
-		new app.LayoutType({title:'Horizontal List'}),
-		new app.LayoutType({title:'Stamp Grid'}),
-		new app.LayoutType({title:'Featured'}),
-		new app.LayoutType({title:'Featured + List'}),
-		new app.LayoutType({title:'Hero Image'}),
+		new app.LayoutType({text:'Vertical List'}),
+		new app.LayoutType({text:'Horizontal List'}),
+		new app.LayoutType({text:'Stamp Grid'}),
+		new app.LayoutType({text:'Featured'}),
+		new app.LayoutType({text:'Featured + List'}),
+		new app.LayoutType({text:'Hero'}),
 	]);
 
 	app.layoutTypeSelect = new app.LayoutTypeSelect({
-		collection: app.layoutTypes,
-		el: app.$layoutTypeSelect[0]
+		collection: app.layoutTypes
 	});
 
 	app.layoutTypeSelect.render();
@@ -67,23 +79,19 @@ app.execute = function(){
 	app.stack = new app.Stack();
 
 	app.stackView = new app.StackView({
-		collection: app.stack,
-		el: app.$stackContainer[0]
+		collection: app.stack
 	});
 
-	app.$stackContainer.sortable({
-		items:"div.layer",
-		cursor:"move",
-		opacity:0.6,
-		update:function(event,ui){
-			// Code to run when dropped.
-		}
-	});
+	app.stackView.sortable();
 
 	app.$addLayerButton.click(function(){
 		app.addLayer();
 		return false;
 	});
+
+	app.on('layer:changed',this.onLayerChanged);
+
+	window.app = app;
 };
 app.loadTemplate = function(template) {
 	if (typeof app.templates=="undefined") {
@@ -185,17 +193,21 @@ app.GeoRegionView = Backbone.View.extend({
 app.ContentType = Backbone.Model.extend({
 	defaults:{
 		modelType: "ContentType",
-		title: "Untitled"
+		text: "Untitled",
+		value: false
 	},
 	initialize: function(){
-		this.id = "content-type-"+app.dashify(this.attributes.title.replace('+','plus'));
+		this.id = app.dashify(this.get('text').replace('+','plus')).replace(/^-+\s*(.*)$/,'$1');
+		if ( ! this.get('value') )
+			this.set('value',this.id);
 	}
 });
-app.ContentTypeOptionList = Backbone.Collection.extend({
-	collectionType: "ContentTypeOptionList",
+app.ContentTypes = Backbone.Collection.extend({
+	collectionType: "ContentTypes",
 	model: app.ContentType
 });
 app.ContentTypeSelect = Backbone.View.extend({
+	el:"#content-type-select",
 	tagName: 'select',
 	initialize: function(options){
 		this.options.viewType = "ContentTypeSelect";
@@ -212,16 +224,18 @@ app.ContentTypeSelect = Backbone.View.extend({
 /**
  * layout-types.js - Backbone Model and basic View for Types of Content used for HTML <select>
  *
- * A Content Type is a type of content that can be presented in a "Layer", i.e. document, spreadsheet, video, etc.
- *
+ * A Layout Type is a type of content that can be presented in a "Layer", i.e. horizontal list, vertical list, etc.
  */
 app.LayoutType = Backbone.Model.extend({
 	defaults:{
 		modelType: "LayoutType",
-		title: "Untitled"
+		text: "Untitled",
+		value: false
 	},
 	initialize: function(){
-		this.id = "layout-type-"+app.dashify(this.attributes.title.replace('+','plus'));
+		this.id = app.dashify(this.get('text').replace('+','plus')).replace(/^-+\s*(.*)$/,'$1');
+		if ( ! this.get('value') )
+			this.set('value',this.id);
 	}
 });
 app.LayoutTypes = Backbone.Collection.extend({
@@ -229,17 +243,17 @@ app.LayoutTypes = Backbone.Collection.extend({
 	model: app.LayoutType
 });
 app.LayoutTypeSelect = Backbone.View.extend({
+	el:'#layout-type-select',
 	tagName: 'select',
 	initialize: function(options){
 		this.options.viewType = "LayoutTypeSelect";
 		this.options.selection = ""; // @todo Set this from stored value
-		_.bind(this,"render");
+		//_.bind(this,"render");
 	},
 	render: function(){
 		this.template = _.template(app.loadTemplate("layout-type-select"));
 		this.$el.html(this.template({options:this.collection}));
 		this.$el.find("option[value=\"layout-type-"+this.options.selection+"\"]").prop("selected",true);
-		this.$el.change(function(){ alert('Layout Types Selected!');});
 		return this;
 	}
 });
@@ -251,80 +265,111 @@ app.LayoutTypeSelect = Backbone.View.extend({
 app.Layer = Backbone.Model.extend({
 	defaults:{
 		modelType: "Layer",
+		contentType:false,
+		layoutType:false,
 		title:"Untitled",
-		container:null, // Stack
-		form:null,	// LayerForm
-		taxonomy:{},
+		container:false, // Stack
+		form:false,	// LayerForm
+		related:{},
 		orderby:"most-recent",
 		includeTerms:[],
 		excludeTerms:[],
 		includePosts:[],
-		excludePosts:[]
+		excludePosts:[],
+		order:0
 	},
-	initialize: function(options) {
-		this.taxonomy = {
+	onChange: function(layer) {
+		app.trigger('layer:changed');
+	},
+	initialize: function(attributes) {
+		this.related = {
 			brands:[],
 			regions:[]
 		};
-		this.attributes.title += " #" +(app.stack.length+1).toString();
+		this.set('title',this.get('title')+" #" +(app.stack.length+1).toString());
 		this.id = app.dashify(this.attributes.title);
-		this.form = new app.LayerForm({model:this});
+		this.on('change',this.onChange);
 	}
 });
+
 app.LayerForm = Backbone.View.extend({
 	tagName: 'form',
 	className: "layer-form",
-	initialize: function(options){
+	template: _.template(app.loadTemplate('layer-form')),
+	events:{
+		'keyup #layer-title': 'onUpdateTitle'
+	},
+	initialize: function(){
 		this.options.viewType = "LayerForm";
 		this.id = this.className;
-		this.options.htmlName = app.underscorify(this.id);
+		this.options.htmlName = app.underscorify(this.className);
+	},
+	onUpdateTitle: function(event){
+		this.model.set('title', $(event.target).val() );
+	},
+	highlight: function(){
+		this.$el.effect("highlight",{},1500);
 	},
 	render: function(){
-		var html = app.loadTemplate('layer-form');
-		this.template = _.template(html);
 		this.$el.hide();
 		this.$el.attr('id',this.id);
 		this.$el.attr('name',this.options.htmlName);
-		this.$el.html(this.template({
-			id:this.id,
-			layer:this.model.attributes
-		}));
-		this.$el.effect("highlight", {}, 1500);
+		this.$el.html(this.template(this.model.toJSON()));
 		return this;
+	},
+	close:function() {
+		this.remove();
+		this.unbind();
+		this.stopListening();
 	}
 });
 app.LayerView = Backbone.View.extend({
 	tagName: 'div',
-	className: "layer",
+	className: 'layer',
+	events:{
+		'click':'onClick'
+	},
 	initialize: function(options){
 		this.options.viewType = "LayerView";
-		this.options.selected = false;
-		this.options.form = new app.LayerForm({
-			model:this.model,
-			el:app.$layerFormContainer[0]
-		});
+		if (typeof options.container=="undefined")
+			this.options.container = app.stackView;
 		this.listenTo(this.model,'change',this.render);
 	},
+	onClick: function(){
+		this.select();
+	},
+	select: function(){
+		app.stackView.select(this).render();
+	},
+	deselect: function(){
+		this.options.form.close();
+		this.$el.removeClass("selected");
+	},
+	isSelected: function() {
+		return this===this.options.container.options.selected;
+	},
 	render: function(){
-		var html = app.loadTemplate('layer');
+		var isSelected, html = app.loadTemplate('layer');
 		this.template = _.template(html);
-		if (this.options.selected) {
-			this.$el.hide();
-		}
 		this.$el.attr('id',this.model.id);
+		/**
+		 * @todo this next does not work but the one after it
+		 * does and I don't understand what the difference is.
+		 */
+		//this.$el.data('cid',this.model.cid);
 		this.$el.attr('data-cid',this.model.cid);
-		if ( this.options.selected ) {
+		if (isSelected = this.isSelected()) {
 			this.$el.addClass('selected');
-		} else {
-			this.$el.removeClass('selected');
 		}
-		this.$el.html(this.template({layer:this.model.attributes}));
-		if (this.options.selected) {
+		this.$el.html(this.template(this.model.toJSON()));
+		if (isSelected) {
 			this.$el.fadeIn();
 		}
 		return this;
 	}
 });
+
+//http://stackoverflow.com/questions/13269071/howto-bind-a-click-event-in-a-backbone-subview
 /**
  * stack.js - Backbone Model and basic Views for a "Stack".
  *
@@ -332,22 +377,30 @@ app.LayerView = Backbone.View.extend({
  */
 app.Stack = Backbone.Collection.extend({
 	modelType: "Stack",
-	model: app.Layer
+	model: app.Layer,
+	initialize: function(){
+		this.on('add',function(){ app.trigger('layer:changed') });
+	},
+	comparator: function(layer) {
+		return layer.get('order');
+	}
 });
 app.StackView = Backbone.View.extend({
-	events:{
-		'click .layer':'onLayerClick'
-	},
+	el:"#stack-container",
 	initialize: function(options) {
 		this.options.viewType = "StackView";
+		this.options.selected = null;
 		if (!("collection" in this)) {
 			this.collection = new app.Stack();
 		}
-		this.listenTo(this.collection,'add',this.onAdd,this);
+		this.listenTo(this.collection,'add',this.onAddLayer,this);
 		this._layerViews = [];
 	},
-	onAdd: function(layer){
-		var layerView = this._layerViews[layer.cid] = new app.LayerView({model:layer});
+	onAddLayer: function(layer){
+		var layerView = this._layerViews[layer.cid] = new app.LayerView({
+			model:layer,
+			container:this
+		});
 		this.select(layerView).render();
 	},
 	getLayerView: function(layer){
@@ -355,32 +408,48 @@ app.StackView = Backbone.View.extend({
 		return cid in this._layerViews ? this._layerViews[cid] : null;
 	},
 	render: function() {
-		var layerView,that = this;
-		this.$el.empty();	// @todo Render only what is needed
+		var layerView,outerThis = this;
+		//this.$el.empty();	// @todo Render only what is needed
 		this.$el.attr('data-cid',this.cid);
 		this.collection.each(function(layer){
-			layerView = that._layerViews[layer.cid];
-			that.$el.append(layerView.render().el);
+			layerView = outerThis._layerViews[layer.cid];
+			outerThis.$el.append(layerView.render().el);
 		});
-		that.$el.append("<div class=\"clear\"></div>");
+		this.$el.append("<div class=\"clear\"></div>");
 		return this;
-	},
-	onLayerClick:function(event){
-		app.stackView.select(this.getLayerView(event.target.dataset.cid)).render();
 	},
 	select:function(layerView){
-		var that = this;
-		this.collection.each(function(layer){
-			that.getLayerView(layer.cid).options.selected = false;
+		if (this.options.selected)
+			this.options.selected.deselect();
+		var form = new app.LayerForm({
+			model:layerView.model
 		});
-		layerView.options.selected = true;
-		layerView.options.form.render();
+		app.$layerFormContainer.empty().append(form.render().el);
+		form.highlight();
+		layerView.options.form = form;
+		this.options.selected = layerView;
 		return this;
+	},
+	sortable:function(options){
+		var outerThis = this;
+		this.$el.sortable(_.extend({},options,{
+			items:"div.layer",
+			cursor:"move",
+			opacity:0.6,
+			update:function(event,ui){
+				var i= 1;
+				_(outerThis.$el.sortable("toArray",{attribute:"data-cid"})).each(function(cid){
+					outerThis._layerViews[cid].model.set('order',i++);
+				});
+				outerThis.collection.sort();
+				outerThis.render();
+			}
+		}));
 	}
 });
 /**
  * postfix.combinejs - Closing wrapper for use with CombineJS to wrap all Javascript code into a single /js/scripts.js
  */
   app.execute();
-});
+})(jQuery);
 //@ sourceMappingURL=scripts.js.map

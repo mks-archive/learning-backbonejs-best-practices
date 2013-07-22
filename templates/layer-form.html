@@ -1,5 +1,5 @@
 <label for="layer-title">Layer Title:</label>
-<input type="text" id="layer-title" name="layer_title" value="<%= layer.title %>" />
+<input type="text" id="layer-title" name="layer_title" value="<%= title %>" />
 
   <div id="layer-brand-wrapper" class="html-select">
     <label for="layer-brand">For this Brand:</label>
@@ -44,16 +44,16 @@
   </div>
 
 <label for="layer-include-terms">WITH these Folksonomy Tags:</label>
-<input type="text" id="layer-include-terms" name="layer_include_terms" value="<%= layer.includeTerms.join(' ') %>" />
+<input type="text" id="layer-include-terms" name="layer_include_terms" value="<%= includeTerms.join(' ') %>" />
 
-<label for="layer-exclude-terms">WITH these Folksonomy Tags:</label>
-<input type="text" id="layer-exclude-terms" name="layer_exclude_terms" value="<%= layer.excludeTerms.join(' ') %>" />
+<label for="layer-exclude-terms">WITHOUT these Folksonomy Tags:</label>
+<input type="text" id="layer-exclude-terms" name="layer_exclude_terms" value="<%= excludeTerms.join(' ') %>" />
 
 <label for="layer-include-posts">Also INCLUDE these:</label>
-<input type="text" id="layer-include-posts" name="layer_include_posts" value="<%= layer.includePosts.join(' ') %>" />
+<input type="text" id="layer-include-posts" name="layer_include_posts" value="<%= includePosts.join(' ') %>" />
 
 <label for="layer-exclude-posts">Also EXCLUDE these:</label>
-<input type="text" id="layer-exclude-posts" name="layer_exclude_posts" value="<%= layer.excludePosts.join(' ') %>" />
+<input type="text" id="layer-exclude-posts" name="layer_exclude_posts" value="<%= excludePosts.join(' ') %>" />
 
 
 

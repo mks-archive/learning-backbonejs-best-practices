@@ -1,5 +1,5 @@
 /**
  * prefix.combinejs - Opening wrapper for use with CombineJS to wrap all Javascript code into a single /js/scripts.js
  */
-jQuery(function($) {
+(function($) {
 
