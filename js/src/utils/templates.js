@@ -1,6 +1,6 @@
 app.loadTemplate = function(template) {
-	if (typeof app.templates=="undefined") {
-		app.templates = eval("(" + $("#backbone-templates").text() + ")");
+	if (typeof app._templates=="undefined") {
+		app._templates = eval("(" + $("#backbone-templates").text() + ")");
 	}
-	return app.templates[template];
+	return app._templates[template];
 }

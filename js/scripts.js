@@ -17,8 +17,8 @@ app.assignElement = function(id) {
 
 app.addLayer = function(){
 	var layer = new app.Layer({
-			contentType: $("#content-type-select").val(),
-			layoutType: $("#layout-type-select").val(),
+			contentType: $("#content-types-select").val(),
+			layout: $("#layouts-select").val(),
 			container:this.stack
 		});
 	this.stack.add(layer);
@@ -38,43 +38,17 @@ app.execute = function(){
 	app.$layerFormContainer = app.assignElement("layer-form-container");
 	app.$layerIncludeTerms = app.assignElement("layer-include-terms");
 
-	app.contentTypes = new app.ContentTypes([
-		new app.ContentType({text:'Contact (e.g. People)', value:'contact'}),
-		new app.ContentType({text:'Event'}),
-		new app.ContentType({text:'Downloadable'}),
-		new app.ContentType({text:'- Works'}),
-		new app.ContentType({text:'-- Document'}),
-		new app.ContentType({text:'-- Spreadsheet'}),
-		new app.ContentType({text:'-- Presentation'}),
-		new app.ContentType({text:'- Media'}),
-		new app.ContentType({text:'-- Audio'}),
-		new app.ContentType({text:'-- Video'}),
-		new app.ContentType({text:'-- Image'}),
-		new app.ContentType({text:'- Other'}),
-		new app.ContentType({text:'Stack'}),
-		new app.ContentType({text:'Mixed'}),
-	]);
-
-	app.contentTypeSelect = new app.ContentTypeSelect({
+	app.contentTypes = app.ContentTypes.load();
+	app.contentTypesSelect = new app.ContentTypesSelect({
 		collection: app.contentTypes
 	});
+	app.contentTypesSelect.render();
 
-	app.contentTypeSelect.render();
-
-	app.layoutTypes = new app.LayoutTypes([
-		new app.LayoutType({text:'Vertical List'}),
-		new app.LayoutType({text:'Horizontal List'}),
-		new app.LayoutType({text:'Stamp Grid'}),
-		new app.LayoutType({text:'Featured'}),
-		new app.LayoutType({text:'Featured + List'}),
-		new app.LayoutType({text:'Hero'}),
-	]);
-
-	app.layoutTypeSelect = new app.LayoutTypeSelect({
-		collection: app.layoutTypes
+	app.layouts = app.Layouts.load();
+	app.layoutsSelect = new app.LayoutsSelect({
+		collection: app.layouts
 	});
-
-	app.layoutTypeSelect.render();
+	app.layoutsSelect.render();
 
 	app.stack = new app.Stack();
 
@@ -93,11 +67,17 @@ app.execute = function(){
 
 	window.app = app;
 };
-app.loadTemplate = function(template) {
-	if (typeof app.templates=="undefined") {
-		app.templates = eval("(" + $("#backbone-templates").text() + ")");
+app.loadData = function(dataType) {
+	if (typeof app._data=="undefined") {
+		app._data = eval("(" + $("#backbone-data").text() + ")");
 	}
-	return app.templates[template];
+	return app._data[dataType];
+}
+app.loadTemplate = function(template) {
+	if (typeof app._templates=="undefined") {
+		app._templates = eval("(" + $("#backbone-templates").text() + ")");
+	}
+	return app._templates[template];
 }
 app._transformify=function(s,re,rp){
 	var x;
@@ -140,13 +120,13 @@ app.Brand = Backbone.Model.extend({
 app.BrandView = Backbone.View.extend({
 	tagName: 'div',
 	className: "brand",
-	initialize: function(options){
+	template: false,
+	initialize: function(){
+		this.template||(this.template=_.template(app.loadTemplate('brand-view')));
 		this.options.viewType = "BrandView";
-		this.model.bind('change',_.bind(this.render,this));
+		this.model.on('change',this.render);
 	},
 	render: function(){
-		var html = app.loadTemplate('brand-view');
-		this.template = _.template(html);
 		this.$el.attr('id',this.model.id);
 		this.$el.attr('data-cid',this.model.cid);
 		this.$el.html(this.template({brand:this.model}));
@@ -172,13 +152,13 @@ app.GeoRegion = Backbone.Model.extend({
 app.GeoRegionView = Backbone.View.extend({
 	tagName: 'div',
 	className: "region",
-	initialize: function(options){
+	template: false,
+	initialize: function(){
+		this.template||(this.template=_.template(app.loadTemplate('region-view')));
 		this.options.viewType = "GeoRegionView";
 		this.model.bind('change',_.bind(this.render,this));
 	},
 	render: function(){
-		var html = app.loadTemplate('region-view');
-		this.template = _.template(html);
 		this.$el.attr('id',this.model.id);
 		this.$el.attr('data-cid',this.model.cid);
 		this.$el.html(this.template({region:this.model}));
@@ -206,29 +186,32 @@ app.ContentTypes = Backbone.Collection.extend({
 	collectionType: "ContentTypes",
 	model: app.ContentType
 });
-app.ContentTypeSelect = Backbone.View.extend({
-	el:"#content-type-select",
+app.ContentTypes.load = function(){
+	return new app.ContentTypes(app.loadData('content-types-select'));
+};
+app.ContentTypesSelect = Backbone.View.extend({
+	el:"#content-types-select",
 	tagName: 'select',
-	initialize: function(options){
-		this.options.viewType = "ContentTypeSelect";
+	initialize: function(){
+		this.template = _.template(app.loadTemplate('content-types-select'));
+		this.options.viewType = "ContentTypesSelect";
 		this.options.selection = ""; // @todo Set this from stored value
 		_.bind(this,"render");
 	},
 	render: function(){
-		this.template = _.template(app.loadTemplate("content-type-select"));
 		this.$el.html(this.template({options:this.collection}));
 		this.$el.find("option[value=\"content-type-"+this.options.selection+"\"]").prop("selected",true);
 		return this;
 	}
 });
 /**
- * layout-types.js - Backbone Model and basic View for Types of Content used for HTML <select>
+ * layouts.js - Backbone Model and basic View for Types of Content used for HTML <select>
  *
- * A Layout Type is a type of content that can be presented in a "Layer", i.e. horizontal list, vertical list, etc.
+ * A Layout is a type of content that can be presented in a "Layer", i.e. horizontal list, vertical list, etc.
  */
-app.LayoutType = Backbone.Model.extend({
+app.Layout = Backbone.Model.extend({
 	defaults:{
-		modelType: "LayoutType",
+		modelType: "Layout",
 		text: "Untitled",
 		value: false
 	},
@@ -238,22 +221,40 @@ app.LayoutType = Backbone.Model.extend({
 			this.set('value',this.id);
 	}
 });
-app.LayoutTypes = Backbone.Collection.extend({
-	collectionType: "LayoutTypes",
-	model: app.LayoutType
+app.Layouts = Backbone.Collection.extend({
+	collectionType: "Layouts",
+	model: app.Layout,
+	/**
+	 * Load Layouts for HTML Select
+	 *
+	 * @example data
+	 * 	new app.Layout({text:'Vertical List'}),
+	 * 	new app.Layout({text:'Horizontal List'}),
+	 * 	new app.Layout({text:'Stamp Grid'}),
+	 * 	new app.Layout({text:'Featured'}),
+	 * 	new app.Layout({text:'Featured + List'}),
+	 * 	new app.Layout({text:'Hero'}),
+	 *
+	 * @returns {app.Layouts}
+	 */
 });
-app.LayoutTypeSelect = Backbone.View.extend({
-	el:'#layout-type-select',
+
+app.Layouts.load = function(){
+	return new app.Layouts(app.loadData('layouts-select'));
+};
+
+app.LayoutsSelect = Backbone.View.extend({
+	el:'#layouts-select',
 	tagName: 'select',
-	initialize: function(options){
-		this.options.viewType = "LayoutTypeSelect";
+	initialize: function(){
+		this.template = _.template(app.loadTemplate('layouts-select'));
+		this.options.viewType = "LayoutsSelect";
 		this.options.selection = ""; // @todo Set this from stored value
 		//_.bind(this,"render");
 	},
 	render: function(){
-		this.template = _.template(app.loadTemplate("layout-type-select"));
 		this.$el.html(this.template({options:this.collection}));
-		this.$el.find("option[value=\"layout-type-"+this.options.selection+"\"]").prop("selected",true);
+		this.$el.find("option[value=\"layout-"+this.options.selection+"\"]").prop("selected",true);
 		return this;
 	}
 });
@@ -266,7 +267,7 @@ app.Layer = Backbone.Model.extend({
 	defaults:{
 		modelType: "Layer",
 		contentType:false,
-		layoutType:false,
+		layout:false,
 		title:"Untitled",
 		container:false, // Stack
 		form:false,	// LayerForm
@@ -295,11 +296,12 @@ app.Layer = Backbone.Model.extend({
 app.LayerForm = Backbone.View.extend({
 	tagName: 'form',
 	className: "layer-form",
-	template: _.template(app.loadTemplate('layer-form')),
+	template: false,
 	events:{
 		'keyup #layer-title': 'onUpdateTitle'
 	},
 	initialize: function(){
+		this.template||(this.template=_.template(app.loadTemplate('layer-form')));
 		this.options.viewType = "LayerForm";
 		this.id = this.className;
 		this.options.htmlName = app.underscorify(this.className);
@@ -326,10 +328,12 @@ app.LayerForm = Backbone.View.extend({
 app.LayerView = Backbone.View.extend({
 	tagName: 'div',
 	className: 'layer',
+	template: false,
 	events:{
 		'click':'onClick'
 	},
 	initialize: function(options){
+		this.template||(this.template=_.template(app.loadTemplate('layer')));
 		this.options.viewType = "LayerView";
 		if (typeof options.container=="undefined")
 			this.options.container = app.stackView;
@@ -349,8 +353,7 @@ app.LayerView = Backbone.View.extend({
 		return this===this.options.container.options.selected;
 	},
 	render: function(){
-		var isSelected, html = app.loadTemplate('layer');
-		this.template = _.template(html);
+		var isSelected;
 		this.$el.attr('id',this.model.id);
 		/**
 		 * @todo this next does not work but the one after it

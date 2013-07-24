@@ -18,7 +18,7 @@ if ( $handle = opendir( $directory ) ) {
 }
 $templates = htmlentities( json_encode( $templates ) );
 return <<<HTML
-<pre id="backbone-templates" style="display:none">
+<pre id="backbone-templates" class="hidden">
 {$templates}
 </pre>
 HTML;

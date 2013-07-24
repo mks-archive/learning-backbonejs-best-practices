@@ -17,16 +17,17 @@ app.Brand = Backbone.Model.extend({
 app.BrandView = Backbone.View.extend({
 	tagName: 'div',
 	className: "brand",
-	initialize: function(options){
+	template: false,
+	initialize: function(){
+		this.template||(this.template=_.template(app.loadTemplate('brand-view')));
 		this.options.viewType = "BrandView";
-		this.model.bind('change',_.bind(this.render,this));
+		this.model.on('change',this.render);
 	},
 	render: function(){
-		var html = app.loadTemplate('brand-view');
-		this.template = _.template(html);
 		this.$el.attr('id',this.model.id);
 		this.$el.attr('data-cid',this.model.cid);
 		this.$el.html(this.template({brand:this.model}));
 		return this;
 	}
 });
+

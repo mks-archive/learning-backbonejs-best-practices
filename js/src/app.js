@@ -13,8 +13,8 @@ app.assignElement = function(id) {
 
 app.addLayer = function(){
 	var layer = new app.Layer({
-			contentType: $("#content-type-select").val(),
-			layoutType: $("#layout-type-select").val(),
+			contentType: $("#content-types-select").val(),
+			layout: $("#layouts-select").val(),
 			container:this.stack
 		});
 	this.stack.add(layer);
@@ -34,43 +34,17 @@ app.execute = function(){
 	app.$layerFormContainer = app.assignElement("layer-form-container");
 	app.$layerIncludeTerms = app.assignElement("layer-include-terms");
 
-	app.contentTypes = new app.ContentTypes([
-		new app.ContentType({text:'Contact (e.g. People)', value:'contact'}),
-		new app.ContentType({text:'Event'}),
-		new app.ContentType({text:'Downloadable'}),
-		new app.ContentType({text:'- Works'}),
-		new app.ContentType({text:'-- Document'}),
-		new app.ContentType({text:'-- Spreadsheet'}),
-		new app.ContentType({text:'-- Presentation'}),
-		new app.ContentType({text:'- Media'}),
-		new app.ContentType({text:'-- Audio'}),
-		new app.ContentType({text:'-- Video'}),
-		new app.ContentType({text:'-- Image'}),
-		new app.ContentType({text:'- Other'}),
-		new app.ContentType({text:'Stack'}),
-		new app.ContentType({text:'Mixed'}),
-	]);
-
-	app.contentTypeSelect = new app.ContentTypeSelect({
+	app.contentTypes = app.ContentTypes.load();
+	app.contentTypesSelect = new app.ContentTypesSelect({
 		collection: app.contentTypes
 	});
+	app.contentTypesSelect.render();
 
-	app.contentTypeSelect.render();
-
-	app.layoutTypes = new app.LayoutTypes([
-		new app.LayoutType({text:'Vertical List'}),
-		new app.LayoutType({text:'Horizontal List'}),
-		new app.LayoutType({text:'Stamp Grid'}),
-		new app.LayoutType({text:'Featured'}),
-		new app.LayoutType({text:'Featured + List'}),
-		new app.LayoutType({text:'Hero'}),
-	]);
-
-	app.layoutTypeSelect = new app.LayoutTypeSelect({
-		collection: app.layoutTypes
+	app.layouts = app.Layouts.load();
+	app.layoutsSelect = new app.LayoutsSelect({
+		collection: app.layouts
 	});
-
-	app.layoutTypeSelect.render();
+	app.layoutsSelect.render();
 
 	app.stack = new app.Stack();
 

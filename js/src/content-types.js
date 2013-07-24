@@ -19,19 +19,21 @@ app.ContentTypes = Backbone.Collection.extend({
 	collectionType: "ContentTypes",
 	model: app.ContentType
 });
-app.ContentTypeSelect = Backbone.View.extend({
-	el:"#content-type-select",
+app.ContentTypes.load = function(){
+	return new app.ContentTypes(app.loadData('content-types-select'));
+};
+app.ContentTypesSelect = Backbone.View.extend({
+	el:"#content-types-select",
 	tagName: 'select',
-	initialize: function(options){
-		this.options.viewType = "ContentTypeSelect";
+	initialize: function(){
+		this.template = _.template(app.loadTemplate('content-types-select'));
+		this.options.viewType = "ContentTypesSelect";
 		this.options.selection = ""; // @todo Set this from stored value
 		_.bind(this,"render");
 	},
 	render: function(){
-		this.template = _.template(app.loadTemplate("content-type-select"));
 		this.$el.html(this.template({options:this.collection}));
 		this.$el.find("option[value=\"content-type-"+this.options.selection+"\"]").prop("selected",true);
 		return this;
 	}
 });
-

@@ -7,7 +7,7 @@ app.Layer = Backbone.Model.extend({
 	defaults:{
 		modelType: "Layer",
 		contentType:false,
-		layoutType:false,
+		layout:false,
 		title:"Untitled",
 		container:false, // Stack
 		form:false,	// LayerForm
@@ -36,11 +36,12 @@ app.Layer = Backbone.Model.extend({
 app.LayerForm = Backbone.View.extend({
 	tagName: 'form',
 	className: "layer-form",
-	template: _.template(app.loadTemplate('layer-form')),
+	template: false,
 	events:{
 		'keyup #layer-title': 'onUpdateTitle'
 	},
 	initialize: function(){
+		this.template||(this.template=_.template(app.loadTemplate('layer-form')));
 		this.options.viewType = "LayerForm";
 		this.id = this.className;
 		this.options.htmlName = app.underscorify(this.className);
@@ -67,10 +68,12 @@ app.LayerForm = Backbone.View.extend({
 app.LayerView = Backbone.View.extend({
 	tagName: 'div',
 	className: 'layer',
+	template: false,
 	events:{
 		'click':'onClick'
 	},
 	initialize: function(options){
+		this.template||(this.template=_.template(app.loadTemplate('layer')));
 		this.options.viewType = "LayerView";
 		if (typeof options.container=="undefined")
 			this.options.container = app.stackView;
@@ -90,8 +93,7 @@ app.LayerView = Backbone.View.extend({
 		return this===this.options.container.options.selected;
 	},
 	render: function(){
-		var isSelected, html = app.loadTemplate('layer');
-		this.template = _.template(html);
+		var isSelected;
 		this.$el.attr('id',this.model.id);
 		/**
 		 * @todo this next does not work but the one after it

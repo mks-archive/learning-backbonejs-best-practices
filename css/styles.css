@@ -1,4 +1,7 @@
 /*** http://css-tricks.com/pseudo-element-roundup/ ***/
+.hidden {
+	display:none;
+}
 .clearfix:before,
 .clearfix:after {
 	content:"";

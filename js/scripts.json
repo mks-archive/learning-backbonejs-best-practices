@@ -1,11 +1,12 @@
 [
 	"app.js",
+	"utils/data.js",
 	"utils/templates.js",
 	"utils/string.js",
 	"brands.js",
 	"geo-regions.js",
 	"content-types.js",
-	"layout-types.js",
+	"layouts.js",
 	"layers.js",
 	"stack.js"
 ]

@@ -2,6 +2,7 @@
 /**
  * @version stack-editor-v0.1
  */
+include_once( dirname( $_SERVER['DOCUMENT_ROOT'] ) . '/www/wp-load.php' );
 ob_start();
 ?>
 <!--
@@ -25,13 +26,13 @@ ob_start();
       <p>Step 1. Add a Layer to the Stack:</p>
       <form id="layer-addition-form">
         <div class="input-wrapper">
-          <label for="content-type-select">A. Select Content Type:</label> <select id="content-type-select"><option>To Be Replaced</option></select>
+          <label for="content-types-select">A. Select Content Type:</label> <select id="content-types-select"><option>To Be Replaced</option></select>
         </div>
         <div class="input-wrapper">
-          <label for="layout-type-select">B. Select Layout:</label> <select id="layout-type-select"><option>To Be Replaced</option></select>
+          <label for="layouts-select">B. Select Layout:</label> <select id="layouts-select"><option>To Be Replaced</option></select>
         </div>
         <div class="input-wrapper">
-          <label for="layout-type-select">C. Add to Stack:</label> <button id="add-layer-button">Add Layer</button>
+          <label for="add-layer-button">C. Add to Stack:</label> <button id="add-layer-button">Add Layer</button>
         </div>
       </form>
     </div>
@@ -45,6 +46,7 @@ ob_start();
       <div class="clear"></div>
     </div>
   </div>
+  <?php echo include( __DIR__ . '/includes/load-data.php' ); ?>
   <?php echo include( __DIR__ . '/includes/load-templates.php' ); ?>
   <script src="http://cdnjs.cloudflare.com/ajax/libs/jquery/1.8.3/jquery.js"></script>
   <script src="http://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.10.3/jquery-ui.js"></script>
