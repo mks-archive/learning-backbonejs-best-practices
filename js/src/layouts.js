@@ -17,7 +17,7 @@ app.Layout = Backbone.Model.extend({
 });
 app.Layouts = Backbone.Collection.extend({
 	collectionType: "Layouts",
-	model: app.Layout,
+	model: app.Layout
 	/**
 	 * Load Layouts for HTML Select
 	 *
