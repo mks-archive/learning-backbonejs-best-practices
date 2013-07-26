@@ -3,10 +3,14 @@
 	"utils/data.js",
 	"utils/templates.js",
 	"utils/string.js",
+	"utils/html-elements.js",
+	"add-layer-button.js",
+	"layer-addition-form.js",
 	"brands.js",
 	"geo-regions.js",
 	"content-types.js",
 	"layouts.js",
 	"layers.js",
-	"stack.js"
+	"stack.js",
+	"editor.js"
 ]

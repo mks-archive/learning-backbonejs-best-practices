@@ -1,7 +1,7 @@
 /**
  * stack.js - Backbone Model and basic Views for a "Stack".
  *
- * A Stack cab have one of more veritcally displayed layers for which criteria can be added to the layer.
+ * A Stack can have one of more veritcally displayed layers for which criteria can be added to the layer.
  */
 app.Stack = Backbone.Collection.extend({
 	modelType: "Stack",
@@ -14,15 +14,42 @@ app.Stack = Backbone.Collection.extend({
 	}
 });
 app.StackView = Backbone.View.extend({
-	el:"#stack-container",
+	viewType: 'StackView',
+	events: {
+		'layer:changed': 'onLayerChanged',
+		'layer:nextId': 'onNextId'
+	},
 	initialize: function(options) {
-		this.options.viewType = "StackView";
 		this.options.selected = null;
 		if (!("collection" in this)) {
 			this.collection = new app.Stack();
 		}
 		this.listenTo(this.collection,'add',this.onAddLayer,this);
 		this._layerViews = [];
+	},
+	onNextId: function(layer){
+		layer.id = _.uniqueId(app.dashify(layer.title)+'-');
+	},
+	onLayerChanged: function(layer){
+		var layers = _.map(this.model.stack.models,function(layer){
+			var cloned = _.extend({},layer).attributes;
+			delete cloned.container;
+			return cloned;
+		});
+		/**
+		 * @todo This should be handled by it's own view.
+		 */
+		$('#stack-json').val(JSON.stringify(layers));
+	},
+	addLayer: function() {
+		var form = app.editor.layerAdditionForm;
+		var layer = new app.Layer({
+			contentType: form.contentTypesSelect.getValue(),
+			layout: form.layoutsSelect.getValue(),
+			container: this
+		});
+		this.collection.add(layer);
+		return this;
 	},
 	onAddLayer: function(layer){
 		var layerView = this._layerViews[layer.cid] = new app.LayerView({
@@ -37,13 +64,13 @@ app.StackView = Backbone.View.extend({
 	},
 	render: function() {
 		var layerView,outerThis = this;
-		//this.$el.empty();	// @todo Render only what is needed
+		// @todo Render only what is needed
 		this.$el.attr('data-cid',this.cid);
+		this.setElement('#stack-container');
 		this.collection.each(function(layer){
 			layerView = outerThis._layerViews[layer.cid];
 			outerThis.$el.append(layerView.render().el);
 		});
-		this.$el.append("<div class=\"clear\"></div>");
 		return this;
 	},
 	select:function(layerView){
@@ -52,8 +79,7 @@ app.StackView = Backbone.View.extend({
 		var form = new app.LayerForm({
 			model:layerView.model
 		});
-		app.$layerFormContainer.empty().append(form.render().el);
-		form.highlight();
+		app.editor.setLayerForm(form);
 		layerView.options.form = form;
 		this.options.selected = layerView;
 		return this;

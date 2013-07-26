@@ -1,6 +1,6 @@
 /**
  * postfix.combinejs - Closing wrapper for use with CombineJS to wrap all Javascript code into a single /js/scripts.js
  */
-  app.execute();
+  app.render();
 })(jQuery);
 

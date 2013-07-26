@@ -2,8 +2,11 @@
  * layers.js - Backbone Model and Views for Layer display and edit form.
  *
  * A "Layer" is one of many that can be added to a "Stack" and for which criteria can be added to the layer.
+ *
+ * @see http://stackoverflow.com/questions/13269071/howto-bind-a-click-event-in-a-backbone-subview
  */
 app.Layer = Backbone.Model.extend({
+	id:false,
 	defaults:{
 		modelType: "Layer",
 		contentType:false,
@@ -27,8 +30,9 @@ app.Layer = Backbone.Model.extend({
 			brands:[],
 			regions:[]
 		};
-		this.set('title',this.get('title')+" #" +(app.stack.length+1).toString());
-		this.id = app.dashify(this.attributes.title);
+		app.trigger('layer:nextId',this);
+		if (!this.id)
+			this.id = _.uniqueId('untitled-');
 		this.on('change',this.onChange);
 	}
 });
@@ -111,5 +115,5 @@ app.LayerView = Backbone.View.extend({
 		return this;
 	}
 });
+app.layouts = app.Layouts.load();
 
-//http://stackoverflow.com/questions/13269071/howto-bind-a-click-event-in-a-backbone-subview

@@ -38,18 +38,21 @@ app.Layouts.load = function(){
 };
 
 app.LayoutsSelect = Backbone.View.extend({
-	el:'#layouts-select',
 	tagName: 'select',
+	template: _.template(app.loadTemplate('layouts-select')),
 	initialize: function(){
-		this.template = _.template(app.loadTemplate('layouts-select'));
 		this.options.viewType = "LayoutsSelect";
 		this.options.selection = ""; // @todo Set this from stored value
 		//_.bind(this,"render");
 	},
 	render: function(){
+		this.setElement('#layouts-select');
 		this.$el.html(this.template({options:this.collection}));
 		this.$el.find("option[value=\"layout-"+this.options.selection+"\"]").prop("selected",true);
 		return this;
+	},
+	getValue: function(){
+		return this.$el.val();
 	}
 });
 

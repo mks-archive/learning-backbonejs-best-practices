@@ -14,30 +14,30 @@
 	zoom:1; /** IE 6/7 **/
 }
 /*** ***/
-#stack-editor {
+#editor-container {
 	margin:2em auto;
 	width: 800px;
 }
-#stack-editor .box {
+#editor-container .wrapper {
 	border:1px solid grey;
 	margin-bottom: -1px;
 	padding: 10px 20px;
 }
-#stack-editor .side-by-side {
+#editor-container .side-by-side {
 	height:400px;
 	overflow-y:scroll;
 }
-#layer-addition-container {
+#layer-addition-wrapper {
 	width: 758px;
 }
-#layer-addition-container p {
+#layer-addition-wrapper p {
 	margin: 18px 0 0 0;
 }
-#layer-addition-container .input-wrapper {
+#layer-addition-wrapper .input-wrapper {
 	float:left;
 	margin:1em;
 }
-#layer-addition-container .input-wrapper label {
+#layer-addition-wrapper .input-wrapper label {
 	display:block;
 }
 #stack-wrapper {

@@ -18,22 +18,27 @@ app.ContentType = Backbone.Model.extend({
 app.ContentTypes = Backbone.Collection.extend({
 	collectionType: "ContentTypes",
 	model: app.ContentType
-});
+},{/* @todo Try passing .load() in here */});
 app.ContentTypes.load = function(){
 	return new app.ContentTypes(app.loadData('content-types-select'));
 };
+
 app.ContentTypesSelect = Backbone.View.extend({
-	el:"#content-types-select",
+	viewType: "ContentTypesSelect",
 	tagName: 'select',
 	initialize: function(){
 		this.template = _.template(app.loadTemplate('content-types-select'));
-		this.options.viewType = "ContentTypesSelect";
 		this.options.selection = ""; // @todo Set this from stored value
-		_.bind(this,"render");
 	},
 	render: function(){
+		this.setElement('#content-types-select');
 		this.$el.html(this.template({options:this.collection}));
 		this.$el.find("option[value=\"content-type-"+this.options.selection+"\"]").prop("selected",true);
 		return this;
+	},
+	getValue: function(){
+		return this.$el.val();
 	}
 });
+app.contentTypes = app.ContentTypes.load();
+

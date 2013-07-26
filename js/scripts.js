@@ -9,63 +9,10 @@
 if (typeof app == "undefined") var app={};
 _.extend(app, Backbone.Events);
 
-app.assignElement = function(id) {
-	var cameledId = app.camelify(id);
-	app[cameledId+"Id"] = id;
-	return $("#"+app[cameledId+"Id"]);
-};
-
-app.addLayer = function(){
-	var layer = new app.Layer({
-			contentType: $("#content-types-select").val(),
-			layout: $("#layouts-select").val(),
-			container:this.stack
-		});
-	this.stack.add(layer);
-	return this;
-};
-app.onLayerChanged = function(layer){
-	var layers = _.map(app.stack.models,function(layer){
-		var cloned = _.extend({},layer).attributes;
-		delete cloned.container;
-		return cloned;
-	});
-	$('#stack-json').val(JSON.stringify(layers));
-};
-app.execute = function(){
-	app.$layerAdditionContainer = app.assignElement("layer-addition-container");
-	app.$addLayerButton = app.assignElement("add-layer-button");
-	app.$layerFormContainer = app.assignElement("layer-form-container");
-	app.$layerIncludeTerms = app.assignElement("layer-include-terms");
-
-	app.contentTypes = app.ContentTypes.load();
-	app.contentTypesSelect = new app.ContentTypesSelect({
-		collection: app.contentTypes
-	});
-	app.contentTypesSelect.render();
-
-	app.layouts = app.Layouts.load();
-	app.layoutsSelect = new app.LayoutsSelect({
-		collection: app.layouts
-	});
-	app.layoutsSelect.render();
-
-	app.stack = new app.Stack();
-
-	app.stackView = new app.StackView({
-		collection: app.stack
-	});
-
-	app.stackView.sortable();
-
-	app.$addLayerButton.click(function(){
-		app.addLayer();
-		return false;
-	});
-
-	app.on('layer:changed',this.onLayerChanged);
-
+app.render = function(){
 	window.app = app;
+	app.editor = new app.EditorView();
+	app.editor.render();
 };
 app.loadData = function(dataType) {
 	if (typeof app._data=="undefined") {
@@ -74,11 +21,15 @@ app.loadData = function(dataType) {
 	return app._data[dataType];
 }
 app.loadTemplate = function(template) {
-	if (typeof app._templates=="undefined") {
+	if (app._templates==undefined) {
 		app._templates = eval("(" + $("#backbone-templates").text() + ")");
 	}
-	return app._templates[template];
-}
+	if ( ! app._templates.hasOwnProperty(template) ) {
+		return '<div class="error">ERROR: Template [%s] not found!</div>'.replace('%s',template);
+	} else {
+		return app._templates[template];
+	}
+};
 app._transformify=function(s,re,rp){
 	var x;
 	while (s!=x) {
@@ -101,6 +52,74 @@ app.camelify=function(s){// Converts foo-bar-string to fooBarString
 	}
 	return cameled;
 };
+app.DivElement = Backbone.View.extend({
+	initialize: function(options){
+		if(!options.template) {
+			this.template = _.template(app.loadTemplate(options.id));
+		} else {
+			this.template = _.template(options.template);
+		}
+	},
+	render: function(){
+		this.$el.attr('id',this.id);
+		this.$el.attr('class',this.className);
+		this.$el.html(this.template(this.options));
+		return this;
+	}
+});
+
+app.DivWrapper = app.DivElement.extend({
+	className:'wrapper clearfix'
+});
+
+app.SideBySideDivWrapper = app.DivWrapper.extend({
+	className:this.className+' side-by-side'
+});
+app.AddLayerButton = Backbone.View.extend({
+	viewType: 'AddLayerButton',
+	tagName: 'button',
+	template: _.template('Add Layer'),
+	events:{
+		'click':'onClick'
+	},
+	onClick: function(){
+		app.editor.addLayer();
+		return false;
+	},
+	render: function(){
+		this.setElement('#add-layer-button');
+		this.$el.html(this.template());
+		return this;
+	}
+});
+/**
+ * layer-addition-form.js -
+ */
+app.LayerAdditionForm = Backbone.View.extend({
+	viewType: "LayerAdditionForm",
+	tagName: 'form',
+	template: _.template(app.loadTemplate('layer-addition-form')),
+	contentTypesSelect: false,
+	layoutsSelect: false,
+	addLayerButton: new app.AddLayerButton(),
+	initialize: function(options) {
+		this.contentTypesSelect = new app.ContentTypesSelect({
+			collection: app.contentTypes
+		});
+		this.layoutsSelect = new app.LayoutsSelect({
+			collection: app.layouts
+		});
+		this.addLayerButton = new app.AddLayerButton();
+	},
+	render: function() {
+		this.setElement('#layer-addition-form');
+		this.$el.html(this.template());
+		this.contentTypesSelect.render();
+		this.layoutsSelect.render();
+		this.addLayerButton.render();
+		return this;
+	}
+});
 /**
  * brands.js - Backbone Model and basic View for "Brands"
  *
@@ -185,25 +204,29 @@ app.ContentType = Backbone.Model.extend({
 app.ContentTypes = Backbone.Collection.extend({
 	collectionType: "ContentTypes",
 	model: app.ContentType
-});
+},{/* @todo Try passing .load() in here */});
 app.ContentTypes.load = function(){
 	return new app.ContentTypes(app.loadData('content-types-select'));
 };
+
 app.ContentTypesSelect = Backbone.View.extend({
-	el:"#content-types-select",
+	viewType: "ContentTypesSelect",
 	tagName: 'select',
 	initialize: function(){
 		this.template = _.template(app.loadTemplate('content-types-select'));
-		this.options.viewType = "ContentTypesSelect";
 		this.options.selection = ""; // @todo Set this from stored value
-		_.bind(this,"render");
 	},
 	render: function(){
+		this.setElement('#content-types-select');
 		this.$el.html(this.template({options:this.collection}));
 		this.$el.find("option[value=\"content-type-"+this.options.selection+"\"]").prop("selected",true);
 		return this;
+	},
+	getValue: function(){
+		return this.$el.val();
 	}
 });
+app.contentTypes = app.ContentTypes.load();
 /**
  * layouts.js - Backbone Model and basic View for Types of Content used for HTML <select>
  *
@@ -244,26 +267,32 @@ app.Layouts.load = function(){
 };
 
 app.LayoutsSelect = Backbone.View.extend({
-	el:'#layouts-select',
 	tagName: 'select',
+	template: _.template(app.loadTemplate('layouts-select')),
 	initialize: function(){
-		this.template = _.template(app.loadTemplate('layouts-select'));
 		this.options.viewType = "LayoutsSelect";
 		this.options.selection = ""; // @todo Set this from stored value
 		//_.bind(this,"render");
 	},
 	render: function(){
+		this.setElement('#layouts-select');
 		this.$el.html(this.template({options:this.collection}));
 		this.$el.find("option[value=\"layout-"+this.options.selection+"\"]").prop("selected",true);
 		return this;
+	},
+	getValue: function(){
+		return this.$el.val();
 	}
 });
 /**
  * layers.js - Backbone Model and Views for Layer display and edit form.
  *
  * A "Layer" is one of many that can be added to a "Stack" and for which criteria can be added to the layer.
+ *
+ * @see http://stackoverflow.com/questions/13269071/howto-bind-a-click-event-in-a-backbone-subview
  */
 app.Layer = Backbone.Model.extend({
+	id:false,
 	defaults:{
 		modelType: "Layer",
 		contentType:false,
@@ -287,8 +316,9 @@ app.Layer = Backbone.Model.extend({
 			brands:[],
 			regions:[]
 		};
-		this.set('title',this.get('title')+" #" +(app.stack.length+1).toString());
-		this.id = app.dashify(this.attributes.title);
+		app.trigger('layer:nextId',this);
+		if (!this.id)
+			this.id = _.uniqueId('untitled-');
 		this.on('change',this.onChange);
 	}
 });
@@ -371,12 +401,11 @@ app.LayerView = Backbone.View.extend({
 		return this;
 	}
 });
-
-//http://stackoverflow.com/questions/13269071/howto-bind-a-click-event-in-a-backbone-subview
+app.layouts = app.Layouts.load();
 /**
  * stack.js - Backbone Model and basic Views for a "Stack".
  *
- * A Stack cab have one of more veritcally displayed layers for which criteria can be added to the layer.
+ * A Stack can have one of more veritcally displayed layers for which criteria can be added to the layer.
  */
 app.Stack = Backbone.Collection.extend({
 	modelType: "Stack",
@@ -389,15 +418,42 @@ app.Stack = Backbone.Collection.extend({
 	}
 });
 app.StackView = Backbone.View.extend({
-	el:"#stack-container",
+	viewType: 'StackView',
+	events: {
+		'layer:changed': 'onLayerChanged',
+		'layer:nextId': 'onNextId'
+	},
 	initialize: function(options) {
-		this.options.viewType = "StackView";
 		this.options.selected = null;
 		if (!("collection" in this)) {
 			this.collection = new app.Stack();
 		}
 		this.listenTo(this.collection,'add',this.onAddLayer,this);
 		this._layerViews = [];
+	},
+	onNextId: function(layer){
+		layer.id = _.uniqueId(app.dashify(layer.title)+'-');
+	},
+	onLayerChanged: function(layer){
+		var layers = _.map(this.model.stack.models,function(layer){
+			var cloned = _.extend({},layer).attributes;
+			delete cloned.container;
+			return cloned;
+		});
+		/**
+		 * @todo This should be handled by it's own view.
+		 */
+		$('#stack-json').val(JSON.stringify(layers));
+	},
+	addLayer: function() {
+		var form = app.editor.layerAdditionForm;
+		var layer = new app.Layer({
+			contentType: form.contentTypesSelect.getValue(),
+			layout: form.layoutsSelect.getValue(),
+			container: this
+		});
+		this.collection.add(layer);
+		return this;
 	},
 	onAddLayer: function(layer){
 		var layerView = this._layerViews[layer.cid] = new app.LayerView({
@@ -412,13 +468,13 @@ app.StackView = Backbone.View.extend({
 	},
 	render: function() {
 		var layerView,outerThis = this;
-		//this.$el.empty();	// @todo Render only what is needed
+		// @todo Render only what is needed
 		this.$el.attr('data-cid',this.cid);
+		this.setElement('#stack-container');
 		this.collection.each(function(layer){
 			layerView = outerThis._layerViews[layer.cid];
 			outerThis.$el.append(layerView.render().el);
 		});
-		this.$el.append("<div class=\"clear\"></div>");
 		return this;
 	},
 	select:function(layerView){
@@ -427,8 +483,7 @@ app.StackView = Backbone.View.extend({
 		var form = new app.LayerForm({
 			model:layerView.model
 		});
-		app.$layerFormContainer.empty().append(form.render().el);
-		form.highlight();
+		app.editor.setLayerForm(form);
 		layerView.options.form = form;
 		this.options.selected = layerView;
 		return this;
@@ -451,8 +506,46 @@ app.StackView = Backbone.View.extend({
 	}
 });
 /**
+ * editor.js - Backbone Model and View for the Editor of a Editor.
+ */
+app.Editor = Backbone.Model.extend({
+	modelType: "Editor",
+	defaults:{
+		stack: new app.Stack()
+	},
+	initialize: function(){
+
+	}
+});
+app.EditorView = Backbone.View.extend({
+	viewType: "EditorView",
+	el:"#editor-container",
+	template: _.template(app.loadTemplate('editor')),
+	layerAdditionForm: new app.LayerAdditionForm,
+	stackView: false,
+	initialize: function(options) {
+		this.model = new app.Editor();
+		this.stackView = new app.StackView({
+			collection: this.model.get('stack')
+		});
+	},
+	addLayer: function() {
+		this.stackView.addLayer();
+	},
+	setLayerForm: function(form){
+		$('#layer-form-container').empty().append(form.render().el);
+		form.highlight();
+	},
+	render: function() {
+		this.$el.html(this.template());
+		this.layerAdditionForm.render();
+		this.stackView.render().sortable();
+		return this;
+	}
+});
+/**
  * postfix.combinejs - Closing wrapper for use with CombineJS to wrap all Javascript code into a single /js/scripts.js
  */
-  app.execute();
+  app.render();
 })(jQuery);
 //@ sourceMappingURL=scripts.js.map

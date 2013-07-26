@@ -21,31 +21,7 @@ ob_start();
   <link href="http://cdnjs.cloudflare.com/ajax/libs/chosen/0.9.15/chosen.css" rel="stylesheet" />
 </head>
 <body>
-  <div id="stack-editor">
-    <div id="layer-addition-container" class="box clearfix">
-      <p>Step 1. Add a Layer to the Stack:</p>
-      <form id="layer-addition-form">
-        <div class="input-wrapper">
-          <label for="content-types-select">A. Select Content Type:</label> <select id="content-types-select"><option>To Be Replaced</option></select>
-        </div>
-        <div class="input-wrapper">
-          <label for="layouts-select">B. Select Layout:</label> <select id="layouts-select"><option>To Be Replaced</option></select>
-        </div>
-        <div class="input-wrapper">
-          <label for="add-layer-button">C. Add to Stack:</label> <button id="add-layer-button">Add Layer</button>
-        </div>
-      </form>
-    </div>
-    <div id="stack-wrapper" class="box side-by-side">
-      <p>Step 2. Reorder and/or Select Layer to Configure:</p>
-      <div id="stack-container" class="clearfix"></div>
-    </div>
-    <div id="layer-form-wrapper" class="box side-by-side">
-      <p>Step 3. Configure Layer:</p>
-      <div id="layer-form-container"></div>
-      <div class="clear"></div>
-    </div>
-  </div>
+  <div id="editor-container"></div>
   <?php echo include( __DIR__ . '/includes/load-data.php' ); ?>
   <?php echo include( __DIR__ . '/includes/load-templates.php' ); ?>
   <script src="http://cdnjs.cloudflare.com/ajax/libs/jquery/1.8.3/jquery.js"></script>
